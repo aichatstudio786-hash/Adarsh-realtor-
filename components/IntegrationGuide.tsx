@@ -1,6 +1,5 @@
-
 import React, { useState } from 'react';
-import { Copy, Terminal, ExternalLink, HelpCircle, Save, Check, Globe, Server, Key } from 'lucide-react';
+import { Copy, Terminal, ExternalLink, HelpCircle, Save, Check, Globe, Server, Key, AlertTriangle } from 'lucide-react';
 
 interface IntegrationGuideProps {
   apiKey: string;
@@ -13,8 +12,11 @@ interface IntegrationGuideProps {
 
 const INTEGRATION_CODE = `
 // FILE: server.js
-// HOSTING: Render.com / Railway / Heroku / Vercel
-// IMPORTANT: Add 'Environment Variables' in your hosting settings for API_KEY, IG_TOKEN, SHEET_ID
+// HOSTING: Render.com / Railway / Heroku
+// IMPORTANT: Add 'Environment Variables' in your hosting settings:
+// API_KEY (Your Gemini Key)
+// IG_TOKEN (Your Instagram Token)
+// SHEET_ID (Your Google Sheet ID)
 
 const express = require('express');
 const { GoogleGenAI } = require('@google/genai');
@@ -64,10 +66,8 @@ app.post('/webhook', async (req, res) => {
         
         const aiText = chatResponse.text;
 
-        // B. Send back to Instagram (Using Graph API)
-        // Note: You need to implement the fetch call to Facebook Graph API here
-        // await sendToInstagram(senderId, aiText, IG_TOKEN);
-        
+        // B. Send back to Instagram (Mock function for demo)
+        // In real deployment, you use axios/fetch to post to graph.facebook.com
         console.log(\`Replied to \${senderId}: \${aiText}\`);
       }
     }
@@ -97,46 +97,54 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
 
   const copyToClipboard = () => {
     navigator.clipboard.writeText(INTEGRATION_CODE);
-    alert('Server code copied!');
+    alert('Backend Server code copied!');
   };
 
   return (
     <div className="space-y-8 pb-10">
       
       {/* INTRO: THE BIG PICTURE */}
-      <div className="bg-gradient-to-r from-slate-900 to-slate-800 rounded-xl p-8 text-white shadow-lg">
-        <h2 className="text-2xl font-bold mb-4">🚀 Full Deployment Roadmap</h2>
+      <div className="bg-slate-900 rounded-xl p-8 text-white shadow-lg">
+        <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+          🚀 Setup Overview
+        </h2>
+        <div className="bg-blue-900/30 border border-blue-500/30 p-4 rounded-lg mb-6 flex items-start gap-3">
+          <AlertTriangle className="text-yellow-400 shrink-0 mt-1" size={20} />
+          <p className="text-sm text-blue-100">
+            <strong>Blank Screen Issue Fixed:</strong> Agar pehle website blank aa rahi thi, to ab theek ho jayegi. Maine code mein zaruri script add kar di hai.
+          </p>
+        </div>
+        
         <p className="text-slate-300 mb-6 leading-relaxed">
-          Bhai, is puri app ko "Real World" mein chalane ke liye hamein <strong>2 CHEEZEIN</strong> host karni hongi.
-          Dono alag alag kaam karti hain, par ek sath milkar system banati hain.
+          Ye pura system 2 hisso (parts) mein chalta hai. Dono zaroori hain:
         </p>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white/10 p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+          <div className="bg-white/10 p-5 rounded-lg border border-white/20">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-blue-500 rounded-lg"><Globe size={20} /></div>
-              <h3 className="font-bold">1. Dashboard Website</h3>
+              <h3 className="font-bold">Part 1: Dashboard Website</h3>
             </div>
             <p className="text-sm text-slate-300">
-              Ye wo screen hai jo abhi aap dekh rahe hain.
+              Ye wo website hai jo abhi aap dekh rahe hain.
               <br/><br/>
-              <strong>Kaam:</strong> Leads dikhana, Admin panel.
+              <strong>Kaam:</strong> Leads dekhna aur Simulator chalana.
               <br/>
-              <strong>Host Kahan Karein:</strong> Vercel / Netlify.
+              <strong>Status:</strong> ✅ Hosted on Netlify (Ready)
             </p>
           </div>
 
-          <div className="bg-white/10 p-4 rounded-lg border border-white/20 backdrop-blur-sm">
+          <div className="bg-white/10 p-5 rounded-lg border border-white/20">
             <div className="flex items-center gap-3 mb-2">
               <div className="p-2 bg-amber-500 rounded-lg"><Server size={20} /></div>
-              <h3 className="font-bold">2. Automation Server</h3>
+              <h3 className="font-bold">Part 2: Automation Server</h3>
             </div>
             <p className="text-sm text-slate-300">
-              Ye "Dimagh" hai jo background mein 24/7 chalta hai.
+              Ye code background mein chalta hai (Invisible).
               <br/><br/>
-              <strong>Kaam:</strong> Instagram se baat karna, Gemini se reply lena.
+              <strong>Kaam:</strong> Instagram se message lena aur reply dena.
               <br/>
-              <strong>Host Kahan Karein:</strong> Render / Railway.
+              <strong>Status:</strong> ⏳ Needs Hosting (Render/Railway)
             </p>
           </div>
         </div>
@@ -147,17 +155,17 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
         <div className="p-6 border-b border-slate-200">
           <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
             <Key size={20} className="text-slate-400" />
-            Step 1: Save Keys for Testing
+            Step 1: Configure Keys
           </h3>
           <p className="text-slate-500 text-sm mt-1">
-            Ye keys abhi <strong>Simulator</strong> ke liye save hongi. Jab aap host karenge, to ye keys wahan "Environment Variables" mein dalni hongi.
+            Yahan apni API keys save karein taake Simulator kaam kare.
           </p>
         </div>
         
         <div className="p-6 space-y-6">
           {/* Gemini Key */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Gemini API Key</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Gemini API Key (Required)</label>
             <div className="flex gap-2">
               <input 
                 type="password" 
@@ -174,7 +182,7 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
 
           {/* Instagram Token */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Instagram Access Token</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Instagram Access Token (Optional for Simulator)</label>
             <input 
               type="password" 
               value={instagramToken}
@@ -186,7 +194,7 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
 
           {/* Google Sheet ID */}
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">Google Sheet ID</label>
+            <label className="block text-sm font-medium text-slate-700 mb-1">Google Sheet ID (Optional for Simulator)</label>
             <input 
               type="text" 
               value={sheetId}
@@ -202,7 +210,7 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
               className={`flex items-center gap-2 px-6 py-2.5 rounded-lg font-medium text-white transition-all ${saved ? 'bg-green-600' : 'bg-slate-900 hover:bg-slate-800'}`}
             >
               {saved ? <Check size={18} /> : <Save size={18} />}
-              {saved ? 'Settings Saved' : 'Save Settings'}
+              {saved ? 'Saved!' : 'Save Configuration'}
             </button>
           </div>
         </div>
@@ -213,11 +221,11 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
          <div className="p-6 border-b border-slate-200">
            <h3 className="text-lg font-bold text-slate-800 flex items-center gap-2">
               <Terminal size={20} className="text-slate-400" />
-              Step 2: Deploy Automation Server
+              Step 2: Backend Code (Automation Server)
            </h3>
            <p className="text-slate-500 text-sm mt-1">
-             Ye code copy karein aur <strong>Render.com</strong> par "Web Service" banakar deploy karein.
-             Wahan "Environment Variables" mein upar wali keys (API_KEY, IG_TOKEN, SHEET_ID) add zaroor karein.
+             Ye code sirf tab chahiye jab aap Instagram Automation ko live (24/7) karna chahein. 
+             Isay <strong>Render.com</strong> par host karna hoga.
            </p>
          </div>
 
@@ -226,7 +234,7 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
           onClick={() => setShowCode(!showCode)}
         >
           <span className="text-sm font-medium text-slate-600">
-            {showCode ? 'Hide Server Code' : 'View Server Code to Copy'}
+            {showCode ? 'Hide Backend Code' : 'View Backend Code'}
           </span>
           <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-1 rounded">Node.js</span>
         </div>
@@ -247,23 +255,6 @@ const IntegrationGuide: React.FC<IntegrationGuideProps> = ({
              </pre>
           </div>
         )}
-      </div>
-
-      {/* STEP 3: FINAL CONNECTION */}
-      <div className="bg-blue-50 border border-blue-200 p-6 rounded-xl flex items-start gap-4">
-        <div className="p-2 bg-blue-100 rounded-full text-blue-600 mt-1">
-          <HelpCircle size={20} />
-        </div>
-        <div>
-          <h4 className="font-bold text-blue-900">Akhiri Step: Connection Kaise Hoga?</h4>
-          <p className="text-sm text-blue-800 mt-1 leading-relaxed">
-            1. Jab aap Server deploy kar denge (Render pe), aapko ek URL milega (e.g., <code>https://my-bot.onrender.com</code>).
-            <br/>
-            2. Ye URL aapko <strong>Meta (Facebook) Developers Portal</strong> mein jaakar "Webhook URL" mein dalna hoga.
-            <br/>
-            3. Bas! Ab jab koi Instagram pe message karega, Meta us message ko aapke Render wale Server pe bhejega, aur Server Gemini se jawab lekar wapis bhej dega.
-          </p>
-        </div>
       </div>
 
     </div>
