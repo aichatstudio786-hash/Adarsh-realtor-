@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, MessageSquareText, Settings, Database, Code2 } from 'lucide-react';
+import { LayoutDashboard, MessageSquareText, Settings, Database, SlidersHorizontal } from 'lucide-react';
 import BotSimulator from './components/BotSimulator';
 import LeadsManager from './components/LeadsManager';
 import IntegrationGuide from './components/IntegrationGuide';
@@ -7,12 +7,15 @@ import { Lead } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'simulator' | 'leads' | 'setup'>('dashboard');
+  
+  // Centralized State for Configuration
   const [apiKey, setApiKey] = useState(process.env.API_KEY || '');
   const [sheetId, setSheetId] = useState('');
+  const [instagramToken, setInstagramToken] = useState('');
+  
   const [leads, setLeads] = useState<Lead[]>([]);
 
   const handleLeadDetected = (lead: Lead) => {
-    // Check if duplicate logic could go here
     setLeads(prev => [lead, ...prev]);
   };
 
@@ -49,14 +52,15 @@ function App() {
             <Database size={18} />
             Leads
           </button>
+          
           <div className="pt-4 mt-4 border-t border-slate-800">
-            <p className="px-4 text-xs font-semibold text-slate-500 uppercase mb-2">Development</p>
+            <p className="px-4 text-xs font-semibold text-slate-500 uppercase mb-2">Admin</p>
             <button 
               onClick={() => setActiveTab('setup')}
               className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'setup' ? 'bg-amber-600 text-white' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
             >
-              <Code2 size={18} />
-              Setup Guide
+              <SlidersHorizontal size={18} />
+              Setup
             </button>
           </div>
         </nav>
@@ -75,26 +79,24 @@ function App() {
       {/* Mobile Nav Header */}
       <div className="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 p-4 flex justify-between items-center">
         <span className="font-bold">Adarsh Realtor</span>
-        <button className="text-white" onClick={() => alert('Please use desktop for full configuration.')}>Menu</button>
+        <button className="text-white" onClick={() => setActiveTab('setup')}>Setup</button>
       </div>
 
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto mt-14 md:mt-0">
         
-        {/* API Key Banner if missing */}
-        {!apiKey && (
-          <div className="mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center">
+        {/* API Key Warning Banner */}
+        {!apiKey && activeTab !== 'setup' && (
+          <button 
+            onClick={() => setActiveTab('setup')}
+            className="w-full mb-6 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg flex justify-between items-center hover:bg-red-100 transition-colors"
+          >
             <div>
-              <p className="font-bold">Setup Required</p>
-              <p className="text-sm">Please enter your Gemini API Key to enable the AI features.</p>
+              <p className="font-bold">⚠️ Setup Required</p>
+              <p className="text-sm">Gemini API Key missing. Click here to configure.</p>
             </div>
-            <input 
-              type="password" 
-              placeholder="Paste API Key Here" 
-              className="px-3 py-2 border rounded text-sm w-64"
-              onChange={(e) => setApiKey(e.target.value)}
-            />
-          </div>
+            <span className="font-semibold text-sm underline">Go to Setup &rarr;</span>
+          </button>
         )}
 
         {/* Dynamic Content */}
@@ -108,14 +110,16 @@ function App() {
                   <p className="text-3xl font-bold text-slate-900 mt-2">{leads.length}</p>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <p className="text-sm text-slate-500 font-medium">Bot Response Rate</p>
-                  <p className="text-3xl font-bold text-green-600 mt-2">100%</p>
+                  <p className="text-sm text-slate-500 font-medium">Bot Status</p>
+                  <p className="text-3xl font-bold text-green-600 mt-2 flex items-center gap-2">
+                    <span className={`w-3 h-3 rounded-full ${apiKey ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                    {apiKey ? 'Active' : 'Offline'}
+                  </p>
                 </div>
                 <div className="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
-                  <p className="text-sm text-slate-500 font-medium">Status</p>
-                  <p className="text-3xl font-bold text-blue-600 mt-2 flex items-center gap-2">
-                    <span className="w-3 h-3 bg-blue-500 rounded-full animate-pulse"></span>
-                    Active
+                  <p className="text-sm text-slate-500 font-medium">Google Sheet Sync</p>
+                  <p className={`text-3xl font-bold mt-2 ${sheetId ? 'text-blue-600' : 'text-slate-400'}`}>
+                    {sheetId ? 'Connected' : 'Pending'}
                   </p>
                 </div>
               </div>
@@ -123,36 +127,40 @@ function App() {
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                  {/* Mini view of leads */}
                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="font-bold mb-4">Recent Activity</h3>
+                    <h3 className="font-bold mb-4">Recent Leads</h3>
                     {leads.slice(0, 3).map(lead => (
                        <div key={lead.id} className="flex items-center justify-between py-3 border-b last:border-0 border-slate-100">
                           <div>
                             <p className="font-medium text-slate-800">{lead.name}</p>
                             <p className="text-xs text-slate-500">{lead.requirement}</p>
                           </div>
-                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Captured</span>
+                          <span className="text-xs text-green-600 bg-green-50 px-2 py-1 rounded">Synced</span>
                        </div>
                     ))}
-                    {leads.length === 0 && <p className="text-slate-400 text-sm">No recent activity.</p>}
+                    {leads.length === 0 && <p className="text-slate-400 text-sm italic">No leads captured yet.</p>}
                  </div>
 
-                 {/* Configuration Status */}
+                 {/* System Health */}
                  <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                    <h3 className="font-bold mb-4">System Health</h3>
+                    <h3 className="font-bold mb-4">Configuration Health</h3>
                     <div className="space-y-4">
-                       <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">Gemini AI Engine</span>
-                          <span className={`text-xs px-2 py-1 rounded ${apiKey ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
-                             {apiKey ? 'Connected' : 'Disconnected'}
+                       <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                          <span className="text-sm text-slate-700">Gemini API Key</span>
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${apiKey ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
+                             {apiKey ? 'Configured' : 'Missing'}
                           </span>
                        </div>
-                       <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">Google Sheets Link</span>
-                          <span className="text-xs px-2 py-1 rounded bg-yellow-100 text-yellow-700">Simulated</span>
+                       <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                          <span className="text-sm text-slate-700">Google Sheet ID</span>
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${sheetId ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                             {sheetId ? 'Configured' : 'Not Linked'}
+                          </span>
                        </div>
-                       <div className="flex justify-between items-center">
-                          <span className="text-sm text-slate-600">Instagram Webhook</span>
-                          <span className="text-xs px-2 py-1 rounded bg-slate-100 text-slate-600">Pending Setup</span>
+                       <div className="flex justify-between items-center p-3 bg-slate-50 rounded-lg">
+                          <span className="text-sm text-slate-700">Instagram Token</span>
+                          <span className={`text-xs px-2 py-1 rounded font-medium ${instagramToken ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}`}>
+                             {instagramToken ? 'Configured' : 'Pending'}
+                          </span>
                        </div>
                     </div>
                  </div>
@@ -169,13 +177,14 @@ function App() {
                   </div>
                   <div className="space-y-4">
                     <div className="bg-blue-50 border border-blue-200 p-4 rounded-xl">
-                      <h4 className="font-bold text-blue-800 mb-2">How to test</h4>
+                      <h4 className="font-bold text-blue-800 mb-2">How it works</h4>
+                      <p className="text-sm text-blue-700 mb-2">
+                        This simulator uses the <strong>Gemini API Key</strong> you saved in the Setup tab.
+                      </p>
                       <ul className="text-sm text-blue-700 space-y-2 list-disc list-inside">
-                        <li>Start by saying "Hi" or "I need a flat".</li>
-                        <li>The bot will ask for your Name.</li>
-                        <li>Then it will ask for your Phone.</li>
-                        <li>Finally, it confirms your requirement.</li>
-                        <li>Once complete, the lead appears in the database.</li>
+                         <li>The bot acts like an Instagram DM agent.</li>
+                         <li>It collects Name, Phone, and Requirement.</li>
+                         <li>Once collected, it adds the lead to the table.</li>
                       </ul>
                     </div>
                   </div>
@@ -192,8 +201,15 @@ function App() {
 
           {activeTab === 'setup' && (
             <div className="h-full">
-              <h2 className="text-2xl font-bold text-slate-800 mb-6">Deployment Guide</h2>
-              <IntegrationGuide />
+              <h2 className="text-2xl font-bold text-slate-800 mb-6">Settings & Configuration</h2>
+              <IntegrationGuide 
+                apiKey={apiKey} 
+                setApiKey={setApiKey}
+                sheetId={sheetId}
+                setSheetId={setSheetId}
+                instagramToken={instagramToken}
+                setInstagramToken={setInstagramToken}
+              />
             </div>
           )}
         </div>
