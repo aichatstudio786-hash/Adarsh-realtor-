@@ -1,0 +1,5 @@
+{
+  "name": "Adarsh Realtor Automation Hub",
+  "description": "A complete automation command center for Adarsh Realtor. Includes AI Chatbot logic, Lead Management, and integration scripts for Instagram and Google Sheets.",
+  "requestFramePermissions": []
+}
