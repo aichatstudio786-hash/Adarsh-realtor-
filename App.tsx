@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { LayoutDashboard, MessageSquareText, Settings, Database, SlidersHorizontal } from 'lucide-react';
+import { LayoutDashboard, MessageSquareText, Settings, Database, SlidersHorizontal, Menu, X } from 'lucide-react';
 import BotSimulator from './components/BotSimulator';
 import LeadsManager from './components/LeadsManager';
 import IntegrationGuide from './components/IntegrationGuide';
@@ -7,6 +7,7 @@ import { Lead } from './types';
 
 function App() {
   const [activeTab, setActiveTab] = useState<'dashboard' | 'simulator' | 'leads' | 'setup'>('dashboard');
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
   // Centralized State for Configuration
   const [apiKey, setApiKey] = useState(process.env.API_KEY || '');
@@ -19,9 +20,14 @@ function App() {
     setLeads(prev => [lead, ...prev]);
   };
 
+  const handleMobileNav = (tab: 'dashboard' | 'simulator' | 'leads' | 'setup') => {
+    setActiveTab(tab);
+    setIsMobileMenuOpen(false);
+  };
+
   return (
     <div className="min-h-screen bg-slate-100 flex font-sans">
-      {/* Sidebar */}
+      {/* Sidebar (Desktop) */}
       <aside className="w-64 bg-slate-900 text-white flex-shrink-0 hidden md:flex flex-col">
         <div className="p-6 border-b border-slate-800">
           <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
@@ -77,13 +83,57 @@ function App() {
       </aside>
 
       {/* Mobile Nav Header */}
-      <div className="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 p-4 flex justify-between items-center">
-        <span className="font-bold">Adarsh Realtor</span>
-        <button className="text-white" onClick={() => setActiveTab('setup')}>Setup</button>
+      <div className="md:hidden fixed top-0 w-full bg-slate-900 text-white z-50 px-4 py-3 flex justify-between items-center shadow-lg">
+        <span className="font-bold text-lg bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          Adarsh Realtor
+        </span>
+        <button 
+          onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+          className="p-2 text-slate-300 hover:text-white transition-colors"
+        >
+          {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
 
+      {/* Mobile Menu Overlay */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden fixed top-[60px] left-0 w-full bg-slate-900 border-t border-slate-800 z-40 shadow-2xl animate-in slide-in-from-top-5 duration-200">
+          <nav className="p-4 space-y-2">
+            <button 
+              onClick={() => handleMobileNav('dashboard')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'dashboard' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+            >
+              <LayoutDashboard size={18} />
+              Dashboard
+            </button>
+            <button 
+              onClick={() => handleMobileNav('simulator')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'simulator' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+            >
+              <MessageSquareText size={18} />
+              Bot Simulator
+            </button>
+            <button 
+              onClick={() => handleMobileNav('leads')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'leads' ? 'bg-blue-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+            >
+              <Database size={18} />
+              Leads
+            </button>
+            <div className="border-t border-slate-700 my-2 pt-2"></div>
+            <button 
+              onClick={() => handleMobileNav('setup')}
+              className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${activeTab === 'setup' ? 'bg-amber-600 text-white' : 'text-slate-300 hover:bg-slate-800'}`}
+            >
+              <SlidersHorizontal size={18} />
+              Setup
+            </button>
+          </nav>
+        </div>
+      )}
+
       {/* Main Content */}
-      <main className="flex-1 p-8 overflow-y-auto mt-14 md:mt-0">
+      <main className="flex-1 p-4 md:p-8 overflow-y-auto mt-16 md:mt-0">
         
         {/* API Key Warning Banner */}
         {!apiKey && activeTab !== 'setup' && (
